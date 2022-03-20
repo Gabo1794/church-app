@@ -19,6 +19,8 @@ export default function App() {
   const [churchActiveGoal, setChurchActiveGoal] = useState(null);
   const [goalVersesDevotional, setGoalVersesDevotional] = useState(null);
 
+  const [currentTab, setCurrentTab] = useState("1");
+
   useEffect(() => {
     if (!churches) {
       GetChurchList();
@@ -85,12 +87,29 @@ export default function App() {
     }
   };
 
+  const onHandleChangeTab = (tabSelected) => {
+    setCurrentTab(tabSelected);
+  };
+
+  const onHandleShowCurrentScreen = () => {
+    switch(currentTab){
+      case "1":
+        return (<ToDayScreen />);
+      case "2":
+        return null;
+      default:
+        return null;
+    }
+  }
+
   return (
     <View style={styles.container}>
       {/* <Text>Open up App.js to start working on your app!</Text>
       <StatusBar style="auto" /> */}
-      <Header />
-      <ToDayScreen />
+      <Header currentTab={currentTab} onHandleChangeTab={onHandleChangeTab} />
+      
+      {onHandleShowCurrentScreen()}
+      
     </View>
   );
 }
@@ -99,8 +118,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 20
+    paddingVertical: 40,
+    paddingHorizontal: 20,
     // alignItems: "center",
     // justifyContent: "center",
-  }
+  },
 });
