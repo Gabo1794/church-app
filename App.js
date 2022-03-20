@@ -11,6 +11,9 @@ import {
   GoalVersesDevotional,
 } from "./constants/StorageConstants";
 
+import Header from "./components/Header";
+import ToDayScreen from "./screens/ToDayScreen";
+
 export default function App() {
   const [churches, setChurches] = useState(null);
   const [churchActiveGoal, setChurchActiveGoal] = useState(null);
@@ -76,7 +79,7 @@ export default function App() {
       let versesDevotional = await AsyncStorage.getItem(GoalVersesDevotional);
       versesDevotional = JSON.parse(versesDevotional);
       setGoalVersesDevotional(versesDevotional);
-      console.log("==>", versesDevotional);
+      // console.log("==>", versesDevotional);
     } catch {
       throw new Error("No fue posible obtener los versículos de la iglesia.");
     }
@@ -84,8 +87,10 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+      {/* <Text>Open up App.js to start working on your app!</Text>
+      <StatusBar style="auto" /> */}
+      <Header />
+      <ToDayScreen />
     </View>
   );
 }
@@ -94,7 +99,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    padding: 20
+    // alignItems: "center",
+    // justifyContent: "center",
+  }
 });
