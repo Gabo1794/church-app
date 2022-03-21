@@ -27,23 +27,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   welcomeText: {
-      fontSize: 40,
-      fontWeight: "bold",
-      marginBottom: 40
+    fontSize: 40,
+    fontWeight: "bold",
+    marginBottom: 40,
   },
   optionText: {
     fontSize: 20,
-    marginBottom: 20
+    marginBottom: 20,
   },
   goalText: {
     fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 20
+    marginBottom: 20,
   },
   verseText: {
     fontSize: 18,
-    marginBottom: 20
-  }
+    marginBottom: 20,
+  },
 });
 
 export default ToDayScreen;

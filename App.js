@@ -13,6 +13,8 @@ import {
 
 import Header from "./components/Header";
 import ToDayScreen from "./screens/ToDayScreen";
+import CreateAccountScreen from "./screens/accountScreens/CreateAccountScreen";
+import VersesDevotionalScreen from "./screens/devotionalScreens/VersesDevotionalScreen";
 
 export default function App() {
   const [churches, setChurches] = useState(null);
@@ -92,24 +94,23 @@ export default function App() {
   };
 
   const onHandleShowCurrentScreen = () => {
-    switch(currentTab){
+    switch (currentTab) {
       case "1":
-        return (<ToDayScreen />);
+        return <ToDayScreen />;
       case "2":
-        return null;
+        return <VersesDevotionalScreen />;
       default:
-        return null;
+        return <CreateAccountScreen />;
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
       {/* <Text>Open up App.js to start working on your app!</Text>
       <StatusBar style="auto" /> */}
       <Header currentTab={currentTab} onHandleChangeTab={onHandleChangeTab} />
-      
+
       {onHandleShowCurrentScreen()}
-      
     </View>
   );
 }
