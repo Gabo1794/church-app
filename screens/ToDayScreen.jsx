@@ -1,20 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-const ToDayScreen = () => {
+const ToDayScreen = ({loginDate, churchActiveGoal, goalVersesDevotional }) => {
+  // const [loginDate, setLoginDate] = useState(null);
+  const [goalDescription, setGoalDscription] = useState(null);
+  const [verseOfDay, setVerseOfDay] = useState(null);
+  const [verseOfDayDescription, setVerseOfDayDescription] = useState(null);
+
+  useEffect(() => {
+    // onHandleLoginDate();
+
+    if(churchActiveGoal) onHandleGoalDescription();
+
+    if(goalVersesDevotional) onHandleVerseOfDay();
+
+  },[/*loginDate,*/ churchActiveGoal, goalVersesDevotional]);
+
+  // const onHandleLoginDate = () => {
+  //   const date = new Date();
+  //   const dayName = date.getDay();
+  //   const dateNumber = date.getDate();
+  //   const dateMonth = date.getMonth();
+  //   const dateYear = date.getFullYear();
+
+  //   setLoginDate(`${weekDays[dayName]} ${dateNumber} de ${months[dateMonth]} del ${dateYear}`)
+  // };
+
+  const onHandleGoalDescription = () => {
+    setGoalDscription(churchActiveGoal[0].Description)
+  }
+
+  const onHandleVerseOfDay = () => {
+    console.log("VErsiculo del dia", goalVersesDevotional)
+    const { Book, Chapter, Description, Verse} = goalVersesDevotional[0];
+
+    
+    setVerseOfDay(`${Book} ${Chapter}:${Verse}`);
+    setVerseOfDayDescription(Description);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Bienvenido</Text>
-      <Text style={styles.optionText}>Sabado 19 de Marzo del 2022</Text>
-      <Text style={styles.goalText}>"Selah"</Text>
-      <Text style={styles.optionText}>Juan 3:16</Text>
-      <Text style={styles.verseText}>
-        Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito,
-        para que todo aquel que en él cree no se pierda, sino que tenga vida
-        eterna. »Porque de tal manera amó Dios al mundo, que ha dado a su Hijo
-        unigénito para que todo aquel que en él cree no se pierda mas tenga vida
-        eterna.
-      </Text>
+      <Text style={styles.optionText}>{loginDate}</Text>
+      <Text style={styles.goalText}>"{goalDescription}"</Text>
+      <Text style={styles.optionText}>{verseOfDay}</Text>
+      <Text style={styles.verseText}>{verseOfDayDescription}</Text>
     </View>
   );
 };

@@ -10,16 +10,25 @@ import {
   ChurchActiveGoal,
   GoalVersesDevotional,
 } from "./constants/StorageConstants";
+import { weekDays, months } from  "./constants/DateConstants";
 
 import Header from "./components/Header";
 import ToDayScreen from "./screens/ToDayScreen";
 import CreateAccountScreen from "./screens/accountScreens/CreateAccountScreen";
 import VersesDevotionalScreen from "./screens/devotionalScreens/VersesDevotionalScreen";
+import ChurchSelected from "./screens/churchScreens/ChurchSelected";
+// import { fire } from "./firebase/config";
+import firebase from 'firebase/app';
 
 export default function App() {
   const [churches, setChurches] = useState(null);
   const [churchActiveGoal, setChurchActiveGoal] = useState(null);
   const [goalVersesDevotional, setGoalVersesDevotional] = useState(null);
+  const [churchSelected, setChurchSelected] = useState(null);
+  const [loginDate, setLoginDate] = useState(null);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentDay, setCurrentDay] = useState(new Date().getDate());
 
   const [currentTab, setCurrentTab] = useState("1");
 
@@ -28,14 +37,16 @@ export default function App() {
       GetChurchList();
     }
 
-    if (!churchActiveGoal) {
+    if (!churchActiveGoal && churchSelected) {
       GetChurchGoalById();
     }
 
-    if (!goalVersesDevotional) {
+    if (churchActiveGoal && !goalVersesDevotional) {
       GetGoalVersesDevotionalById();
     }
-  }, [churches, churchActiveGoal, goalVersesDevotional]);
+
+    onHandleLoginDate()
+  }, [churches, churchActiveGoal, goalVersesDevotional, churchSelected]);
 
   const GetChurchList = async () => {
     try {
@@ -57,7 +68,7 @@ export default function App() {
 
   const GetChurchGoalById = async () => {
     try {
-      const hasChurchGoals = await GetChurchActiveGoal("jmljn9qNhhZHACyrHye7");
+      const hasChurchGoals = await GetChurchActiveGoal(churchSelected);
 
       if (hasChurchGoals === 500)
         throw new Error("No fue posible obtener la visión de la iglesia.");
@@ -73,20 +84,51 @@ export default function App() {
 
   const GetGoalVersesDevotionalById = async () => {
     try {
-      const hasVersesDevotional = await GetGoalVersesDevotional(
-        "7KAweKJuDORLoUbUVNfh"
-      );
+      const beginDate = new Date(`${currentYear}-${currentMonth+1}-${currentDay} 00:00:00`);
+      const endDate = new Date(`${currentYear}-${currentMonth+1}-${currentDay} 23:59:59`);
 
+      const dateStart = firebase.firestore.Timestamp.fromDate(beginDate);
+      const dateEnd = firebase.firestore.Timestamp.fromDate(endDate);
+      
+      const hasVersesDevotional = await GetGoalVersesDevotional(
+        churchActiveGoal[0].Id,
+        dateStart,
+        dateEnd
+      );
+        
       if (hasVersesDevotional === 500)
         throw new Error("No fue posible obtener los versículos de la iglesia.");
 
       let versesDevotional = await AsyncStorage.getItem(GoalVersesDevotional);
       versesDevotional = JSON.parse(versesDevotional);
       setGoalVersesDevotional(versesDevotional);
-      // console.log("==>", versesDevotional);
-    } catch {
-      throw new Error("No fue posible obtener los versículos de la iglesia.");
+      console.log("==>", versesDevotional);
+      /*
+          Book: "Juan"
+          Chapter: 3
+          CreatedDate: {seconds: 1647724844, nanoseconds: 580000000}
+          Description: "Porque de tal manera ...."
+          GoalId: "7KAweKJuDORLoUbUVNfh"
+          Id: "BUk1S6fZfadDPcUgNBBA"
+          LastModificationDate: {seconds: 1647724844, nanoseconds: 580000000}
+          ReadingDate: {seconds: 1647724837, nanoseconds: 252000000}
+          Verse: 16      
+      */
+    } catch(e) {
+      // throw new Error("No fue posible obtener los versículos de la iglesia.");
+      console.log("Error ==>", e)
+      throw new Error(e);
     }
+  };
+
+  const onHandleLoginDate = () => {
+    const date = new Date();
+    const dayName = date.getDay();
+    const dateNumber = date.getDate();
+    const dateMonth = date.getMonth();
+    const dateYear = date.getFullYear();
+
+    setLoginDate(`${weekDays[dayName]} ${dateNumber} de ${months[dateMonth]} del ${dateYear}`)
   };
 
   const onHandleChangeTab = (tabSelected) => {
@@ -96,7 +138,7 @@ export default function App() {
   const onHandleShowCurrentScreen = () => {
     switch (currentTab) {
       case "1":
-        return <ToDayScreen />;
+        return <ToDayScreen loginDate={loginDate} churchActiveGoal={churchActiveGoal} goalVersesDevotional={goalVersesDevotional} />;
       case "2":
         return <VersesDevotionalScreen />;
       default:
@@ -104,15 +146,31 @@ export default function App() {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      {/* <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" /> */}
-      <Header currentTab={currentTab} onHandleChangeTab={onHandleChangeTab} />
+  const IndexHome = () => {
+    if (!churchSelected) {
+      return (
+        <ChurchSelected
+          churches={churches}
+          setChurchSelected={setChurchSelected}
+        />
+      );
+    } else {
+      return (
+        <View style={styles.container}>
+          {/* <Text>Open up App.js to start working on your app!</Text>
+          <StatusBar style="auto" /> */}
+          <Header
+            currentTab={currentTab}
+            onHandleChangeTab={onHandleChangeTab}
+          />
 
-      {onHandleShowCurrentScreen()}
-    </View>
-  );
+          {onHandleShowCurrentScreen()}
+        </View>
+      );
+    }
+  };
+
+  return IndexHome();
 }
 
 const styles = StyleSheet.create({
