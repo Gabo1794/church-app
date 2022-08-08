@@ -1,42 +1,100 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { Text, Card, Button, Icon } from "react-native-elements";
+import { weekDays, months } from '../../../constants/DateConstants';
+import {
+  ChurchActiveGoal,
+  GoalVersesDevotional,
+} from "../../../constants/StorageConstants";
+import { GetGoalVersesDevotional } from "../../../services/goalVersesDevotional";
+import firebase from "firebase/app";
 
-const DayVersesDevotional = () => {
+const DayVersesDevotional = ({ selectedDay, selectedMonth }) => {  
+  const [daySelected, setDaySelected] = useState(selectedDay);
+  const [monthSelected, setMonthSelected] = useState(selectedMonth);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [titleCard, setTitleCard] = useState("");
+  const [versesDevotional, setVersesDevotional] = useState([]);
+
+  useEffect(() => {
+    onHandleChangeDateTitleCard();
+    GetVersesOfDayByGoalId();
+  }, [selectedDay, selectedMonth, currentYear]);
+
+  const onHandleChangeDateTitleCard = () => {
+    const date = new Date(currentYear, monthSelected, daySelected);
+    const dayName = date.getDay();
+
+    setTitleCard(
+      `${weekDays[dayName]} ${daySelected} de ${months[monthSelected]} del ${currentYear}`
+    );
+  };
+
+  const GetVersesOfDayByGoalId = async () => {
+    try {
+      let churchGoal = await AsyncStorage.getItem(ChurchActiveGoal);
+      churchGoal = JSON.parse(churchGoal);
+      
+      if (!churchGoal || churchGoal.length === 0) return null;
+
+      const { Id } = churchGoal[0];
+      const beginDate = new Date(
+        `${currentYear}-${monthSelected + 1}-${daySelected} 00:00:00`
+      );
+      const endDate = new Date(
+        `${currentYear}-${monthSelected + 1}-${daySelected} 23:59:59`
+      );
+
+      const dateStart = firebase.firestore.Timestamp.fromDate(beginDate);
+      const dateEnd = firebase.firestore.Timestamp.fromDate(endDate);
+
+      const hasVersesDevotional = await GetGoalVersesDevotional(
+        Id,
+        dateStart,
+        dateEnd
+      );
+
+       if(hasVersesDevotional === 200){
+          let versesDevotional = await AsyncStorage.getItem(GoalVersesDevotional);
+          versesDevotional = JSON.parse(versesDevotional);
+    
+          setVersesDevotional(versesDevotional);
+       } 
+
+    } catch (e) {
+      throw new Error("No fue posible obtener los versículos de la iglesia.");
+    }    
+  };
+
+  const onHandleCardVerses = verse => {
+    const { Verse, Book, Chapter, Description, Id } = verse;
+    return (
+      <Card key={Id}>
+      <Card.Title>{titleCard}</Card.Title>
+      <Card.Divider />
+      <View key={1} style={styles.cardContainer}>
+        <Text style={styles.name}>{Book} {Chapter} : {Verse}</Text>
+        <Text style={styles.name}>
+          {Description}
+        </Text>
+      </View>
+    </Card>
+    )
+  };
+
   return (
     <View>
-      <Card>
-        <Card.Title>Lunes 22 de Marzo del 2022</Card.Title>
-        <Card.Divider />
-        <View key={1} style={styles.user}>
-          <Text style={styles.name}>Juan 3:16</Text>
-          <Text style={styles.name}>
-            Porque de tal manera amó Dios al mundo, que ha dado a su Hijo
-            unigénito, para que todo aquel que en él cree no se pierda, sino que
-            tenga vida eterna. »Porque de tal manera amó Dios al mundo, que ha
-            dado a su Hijo unigénito para que todo aquel que en él cree no se
-            pierda mas tenga vida eterna.
-          </Text>
-        </View>
-      </Card>
+      {
+        versesDevotional.map(verse => onHandleCardVerses(verse))
+      }
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  fonts: {
-    marginBottom: 8,
-  },
-  user: {
+  cardContainer: {
     marginBottom: 6,
-  },
-  image: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
   },
   name: {
     fontSize: 16,

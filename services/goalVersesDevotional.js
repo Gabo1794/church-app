@@ -11,8 +11,6 @@ const GetGoalVersesDevotional = (goalId, dateToSearchStart, dateToSearchEnd) => 
         .where("ReadingDate", "<", dateToSearchEnd)
         // .where("GoalId", "==", goalId)
         .get();
-
-        console.log("Docs ==>", docs );
   
         if (!docs) {
           return null;
