@@ -40,7 +40,8 @@ const ChurchSelected = ({ churches, setChurchSelected }) => {
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: imageIcon }}
+        // source={{ uri: imageIcon }}
+        // source={require("../../src/images/mdf-logo.jpg")}
         style={styles.image}
         PlaceholderContent={<ActivityIndicator />}
       />
